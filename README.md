@@ -21,6 +21,12 @@ airline's missing-miles form, fills the fields it can, and pauses. You review
 the form, click Submit yourself, then press Enter to move to the next row
 (or 's' + Enter to skip without submitting).
 
+UA, DL, and B6 forms require a logged-in session. The first time the script
+hits each of those airlines, it pauses so you can sign in (and navigate to the
+form, since Delta puts it behind My SkyMiles → Request Mileage Credit). The
+session persists for the rest of the run. AA's request-flight-miles form is
+public.
+
 Rows are skipped automatically when:
 
   - Status is `Verify credit` (might already be credited; rerun with

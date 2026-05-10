@@ -18,14 +18,17 @@ from playwright.sync_api import Page, sync_playwright
 
 CSV_PATH = Path(__file__).parent / "flights.csv"
 
-# Public missing-miles forms. URLs drift; if one 404s, grep for the airline's
+# Missing-miles forms. URLs drift; if one 404s, grep for the airline's
 # "request mileage credit" page and update.
 URLS = {
-    "AA": "https://www.aa.com/i18n/aadvantage-program/miles/request-miles.jsp",
-    "UA": "https://www.united.com/en-us/mileageplus-credit-request",
-    "DL": "https://www.delta.com/mytrips/findMissingMileageCredit",
-    "B6": "https://www.jetblue.com/help/missing-trueblue-points",
+    "AA": "https://www.aa.com/forms/request-flight-miles/",
+    "UA": "https://www.united.com/en/us/mileageplus/mileagecredit/",
+    "DL": "https://www.delta.com/us/en/need-help/support-skymiles",
+    "B6": "https://trueblue.jetblue.com/request-points",
 }
+
+# UA, DL, B6 require a logged-in session. AA's form is public.
+NEEDS_LOGIN = {"UA", "DL", "B6"}
 
 AIRLINE_CODE = {
     "American Airlines": "AA",
@@ -134,6 +137,7 @@ def main() -> int:
               "skipped_tbd": 0, "skipped_unknown_airline": 0, "errors": 0}
 
     aa_ff_number = ""
+    logged_in: set[str] = set()
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=False)
@@ -166,6 +170,10 @@ def main() -> int:
                 print(f"  ! failed to load {URLS[code]}: {e}")
                 counts["errors"] += 1
                 continue
+
+            if code in NEEDS_LOGIN and code not in logged_in:
+                input(f"  log in to {code} in the browser, navigate to the missing-miles form, then press Enter ")
+                logged_in.add(code)
 
             if args.dry:
                 input("  --dry: form loaded; press Enter for next row ")
